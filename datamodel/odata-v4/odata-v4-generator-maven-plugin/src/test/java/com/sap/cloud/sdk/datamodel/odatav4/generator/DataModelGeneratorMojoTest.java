@@ -6,24 +6,24 @@ package com.sap.cloud.sdk.datamodel.odatav4.generator;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.junit.jupiter.api.Test;
 
 import com.sap.cloud.sdk.datamodel.odata.utility.NameSource;
 import com.sap.cloud.sdk.datamodel.odata.utility.S4HanaNamingStrategy;
 import com.sap.cloud.sdk.datamodel.odatav4.generator.annotation.DefaultAnnotationStrategy;
 
-class DataModelGeneratorMojoTest extends AbstractMojoTestCase
+@MojoTest
+class DataModelGeneratorMojoTest
 {
+
+    private static final String POM = "src/test/resources/DataModelGeneratorMojoTest/pom.xml";
+
     @Test
-    void test()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM )
+    void test( DataModelGeneratorMojo mojo )
     {
-        super.setUp();
-        final DataModelGeneratorMojo mojo =
-            (DataModelGeneratorMojo) super.lookupMojo(
-                "generate",
-                "src/test/resources/DataModelGeneratorMojoTest/pom.xml");
         final DataModelGenerator generator = mojo.getDataModelGenerator();
 
         assertSoftly(softly -> {

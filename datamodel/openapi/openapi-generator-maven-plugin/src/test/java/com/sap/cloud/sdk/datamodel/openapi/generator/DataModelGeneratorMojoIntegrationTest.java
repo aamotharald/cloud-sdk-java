@@ -12,7 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
 
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -26,8 +27,13 @@ import lombok.SneakyThrows;
  * module. However, it was found that the OpenAPI generator behaves strange when it comes to accessing the templates as
  * resources on the classpath. This issue was not caught in the {@code DataModelGeneratorIntegrationTest}.
  */
-class DataModelGeneratorMojoIntegrationTest extends AbstractMojoTestCase
+@MojoTest
+class DataModelGeneratorMojoIntegrationTest
 {
+
+    private static final String POM =
+        "src/test/resources/DataModelGeneratorMojoIntegrationTest/sodastore/input/pom.xml";
+
     @TempDir
     File outputDirectory;
 
@@ -35,13 +41,14 @@ class DataModelGeneratorMojoIntegrationTest extends AbstractMojoTestCase
         "src/test/resources/" + DataModelGeneratorMojoIntegrationTest.class.getSimpleName() + "/sodastore/output";
 
     @Test
-    void generateAndCompareSodastoreLibrary()
+    @InjectMojo( goal = "generate", pom = POM )
+    void generateAndCompareSodastoreLibrary( DataModelGeneratorMojo mojo )
         throws Throwable
     {
         final String outputFolderWithActualContent =
             Paths.get(outputDirectory.getAbsolutePath()).resolve("output").toString();
 
-        generateSodastoreLibrary(outputFolderWithActualContent);
+        generateSodastoreLibrary(mojo, outputFolderWithActualContent);
 
         assertThatDirectoriesHaveSameContent(
             Paths.get(FOLDER_WITH_EXPECTED_CONTENT),
@@ -50,20 +57,16 @@ class DataModelGeneratorMojoIntegrationTest extends AbstractMojoTestCase
 
     // Run this test method manually to overwrite the folder containing the expected content with the latest generator state
     @Test
-    void regenerateExpectedSodastoreLibrary()
+    @InjectMojo( goal = "generate", pom = POM )
+    void regenerateExpectedSodastoreLibrary( DataModelGeneratorMojo mojo )
         throws Throwable
     {
-        generateSodastoreLibrary(FOLDER_WITH_EXPECTED_CONTENT);
+        generateSodastoreLibrary(mojo, FOLDER_WITH_EXPECTED_CONTENT);
     }
 
-    private void generateSodastoreLibrary( final String outputDirectory )
+    private void generateSodastoreLibrary( DataModelGeneratorMojo mojo, final String outputDirectory )
         throws Throwable
     {
-        super.setUp();
-        final DataModelGeneratorMojo mojo =
-            (DataModelGeneratorMojo) super.lookupMojo(
-                "generate",
-                "src/test/resources/DataModelGeneratorMojoIntegrationTest/sodastore/input/pom.xml");
 
         final GenerationConfiguration configuration = mojo.retrieveGenerationConfiguration().get();
 

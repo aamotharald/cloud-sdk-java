@@ -1,29 +1,25 @@
-/*
- * Copyright (c) 2024 SAP SE or an SAP affiliate company. All rights reserved.
- */
-
 package com.sap.cloud.sdk.datamodel.odata.generator;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.junit.jupiter.api.Test;
 
 import com.sap.cloud.sdk.datamodel.odata.generator.annotation.DefaultAnnotationStrategy;
 import com.sap.cloud.sdk.datamodel.odata.utility.NameSource;
 import com.sap.cloud.sdk.datamodel.odata.utility.S4HanaNamingStrategy;
 
-class DataModelGeneratorMojoTest extends AbstractMojoTestCase
+@MojoTest
+public class DataModelGeneratorMojoTest
 {
+
+    private static final String POM = "src/test/resources/DataModelGeneratorMojoTest/pom.xml";
+
     @Test
-    void test()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM )
+    void simpleMojo( DataModelGeneratorMojo mojo )
     {
-        super.setUp();
-        final DataModelGeneratorMojo mojo =
-            (DataModelGeneratorMojo) super.lookupMojo(
-                "generate",
-                "src/test/resources/DataModelGeneratorMojoTest/pom.xml");
         final DataModelGenerator generator = mojo.getDataModelGenerator();
 
         assertSoftly(softly -> {
@@ -53,4 +49,5 @@ class DataModelGeneratorMojoTest extends AbstractMojoTestCase
             softly.assertThat(generator.isServiceMethodsPerEntitySet()).isTrue();
         });
     }
+
 }

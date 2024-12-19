@@ -9,8 +9,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.File;
 
+import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoTest;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -20,10 +21,24 @@ import com.sap.cloud.sdk.datamodel.openapi.generator.model.GenerationConfigurati
 
 import io.vavr.control.Try;
 
-class DataModelGeneratorMojoUnitTest extends AbstractMojoTestCase
+@MojoTest
+class DataModelGeneratorMojoUnitTest
 {
 
-    static final String PLUGIN_TEST_DIR = "src/test/resources/DataModelGeneratorMojoUnitTest/%s/pom.xml";
+    static final String POM_XML = "/pom.xml";
+
+    static final String PLUGIN_TEST_DIR = "src/test/resources/DataModelGeneratorMojoUnitTest/";
+
+    static final String POM_testAdditionalPropertiesAndEnablingAnyOfOneOf =
+        PLUGIN_TEST_DIR + "testAdditionalPropertiesAndEnablingAnyOfOneOf" + POM_XML;
+    static final String POM_testEmptyRequiredParameter = PLUGIN_TEST_DIR + "testEmptyRequiredParameter" + POM_XML;
+    static final String POM_testInvocationWithAllParameters =
+        PLUGIN_TEST_DIR + "testInvocationWithAllParameters" + POM_XML;
+    static final String POM_testInvocationWithMandatoryParameters =
+        PLUGIN_TEST_DIR + "testInvocationWithMandatoryParameters" + POM_XML;
+    static final String POM_testSkipExecution = PLUGIN_TEST_DIR + "testSkipExecution" + POM_XML;
+    static final String POM_testInvocationWithUnexpectedApiMaturity =
+        PLUGIN_TEST_DIR + "testInvocationWithUnexpectedApiMaturity" + POM_XML;
 
     @TempDir
     File outputDirectory;
@@ -31,13 +46,11 @@ class DataModelGeneratorMojoUnitTest extends AbstractMojoTestCase
     private DataModelGeneratorMojo sut;
 
     @Test
-    void testInvocationWithAllParameters()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testInvocationWithAllParameters )
+    void testInvocationWithAllParameters( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        super.setUp();
-        sut = loadTestProject("/testInvocationWithAllParameters");
-
-        final GenerationConfiguration configuration = sut.retrieveGenerationConfiguration().get();
+        final GenerationConfiguration configuration = mojo.retrieveGenerationConfiguration().get();
 
         assertThat(configuration.getApiMaturity()).isEqualTo(ApiMaturity.RELEASED);
         assertThat(configuration.isVerbose()).isTrue();
@@ -49,18 +62,18 @@ class DataModelGeneratorMojoUnitTest extends AbstractMojoTestCase
         assertThat(configuration.deleteOutputDirectory()).isTrue();
         assertThat(configuration.isOneOfAnyOfGenerationEnabled()).isFalse();
 
-        sut.setOutputDirectory(outputDirectory.getAbsolutePath());
+        mojo.setOutputDirectory(outputDirectory.getAbsolutePath());
 
-        sut.execute();
+        mojo.execute();
     }
 
     @Test
-    void testInvocationWithMandatoryParameters()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testInvocationWithMandatoryParameters )
+    void testInvocationWithMandatoryParameters( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        sut = loadTestProject("/testInvocationWithMandatoryParameters");
 
-        final GenerationConfiguration configuration = sut.retrieveGenerationConfiguration().get();
+        final GenerationConfiguration configuration = mojo.retrieveGenerationConfiguration().get();
 
         assertThat(configuration.getApiMaturity()).isEqualTo(ApiMaturity.RELEASED);
         assertThat(configuration.isVerbose()).isFalse();
@@ -71,18 +84,18 @@ class DataModelGeneratorMojoUnitTest extends AbstractMojoTestCase
         assertThat(configuration.getApiPackage()).isEqualTo("com.sap.cloud.sdk.datamodel.rest.test.api");
         assertThat(configuration.deleteOutputDirectory()).isFalse();
 
-        sut.setOutputDirectory(outputDirectory.getAbsolutePath());
+        mojo.setOutputDirectory(outputDirectory.getAbsolutePath());
 
-        sut.execute();
+        mojo.execute();
     }
 
     @Test
-    void testEmptyRequiredParameter()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testEmptyRequiredParameter )
+    void testEmptyRequiredParameter( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        sut = loadTestProject("/testEmptyRequiredParameter");
 
-        final Try<Void> mojoExecutionTry = Try.run(sut::execute);
+        final Try<Void> mojoExecutionTry = Try.run(mojo::execute);
 
         assertThat(mojoExecutionTry.isFailure()).isTrue();
 
@@ -96,44 +109,36 @@ class DataModelGeneratorMojoUnitTest extends AbstractMojoTestCase
     }
 
     @Test
-    void testSkipExecution()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testSkipExecution )
+    void testSkipExecution( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        sut = loadTestProject("/testSkipExecution");
-
-        sut.execute();
+        mojo.execute();
         //no reasonable assertion possible
     }
 
     @Test
-    void testInvocationWithUnexpectedApiMaturity()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testInvocationWithUnexpectedApiMaturity )
+    void testInvocationWithUnexpectedApiMaturity( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        sut = loadTestProject("/testInvocationWithUnexpectedApiMaturity");
 
         assertThatExceptionOfType(MojoExecutionException.class)
-            .isThrownBy(sut::execute)
+            .isThrownBy(mojo::execute)
             .withCauseInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void testAdditionalPropertiesAndEnablingAnyOfOneOf()
-        throws Throwable
+    @InjectMojo( goal = "generate", pom = POM_testAdditionalPropertiesAndEnablingAnyOfOneOf )
+    void testAdditionalPropertiesAndEnablingAnyOfOneOf( DataModelGeneratorMojo mojo )
+        throws MojoExecutionException
     {
-        sut = loadTestProject("/testAdditionalPropertiesAndEnablingAnyOfOneOf");
 
-        assertThat(sut.retrieveGenerationConfiguration().get().getAdditionalProperties())
+        assertThat(mojo.retrieveGenerationConfiguration().get().getAdditionalProperties())
             .containsEntry("param1", "val1")
             .containsEntry("param2", "val2")
             .containsEntry("useAbstractionForFiles", "true");
 
-        assertThat(sut.retrieveGenerationConfiguration().get().isOneOfAnyOfGenerationEnabled()).isTrue();
-    }
-
-    private DataModelGeneratorMojo loadTestProject( String testDir )
-        throws Throwable
-    {
-        super.setUp();
-        return (DataModelGeneratorMojo) super.lookupMojo("generate", PLUGIN_TEST_DIR.formatted(testDir));
+        assertThat(mojo.retrieveGenerationConfiguration().get().isOneOfAnyOfGenerationEnabled()).isTrue();
     }
 }

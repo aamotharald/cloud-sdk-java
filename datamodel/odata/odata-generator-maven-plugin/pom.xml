@@ -40,8 +40,6 @@
 		<enforcer.skipEnforceScopeJavaEE>true</enforcer.skipEnforceScopeJavaEE>
 		<!-- allow scope compile for lombok since this module is not included as dependency -->
 		<enforcer.skipEnforceScopeLombok>true</enforcer.skipEnforceScopeLombok>
-		<!-- allow JUnit 4 as we need to compile against MojoRule, but we don't use JUnit 4 for test execution itself -->
-		<enforcer.skipBanJunit4>true</enforcer.skipBanJunit4>
 	</properties>
 	<dependencies>
 		<dependency>
