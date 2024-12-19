@@ -43,8 +43,6 @@ class DataModelGeneratorMojoUnitTest
     @TempDir
     File outputDirectory;
 
-    private DataModelGeneratorMojo sut;
-
     @Test
     @InjectMojo( goal = "generate", pom = POM_testInvocationWithAllParameters )
     void testInvocationWithAllParameters( DataModelGeneratorMojo mojo )
@@ -92,7 +90,6 @@ class DataModelGeneratorMojoUnitTest
     @Test
     @InjectMojo( goal = "generate", pom = POM_testEmptyRequiredParameter )
     void testEmptyRequiredParameter( DataModelGeneratorMojo mojo )
-        throws MojoExecutionException
     {
 
         final Try<Void> mojoExecutionTry = Try.run(mojo::execute);
@@ -120,7 +117,6 @@ class DataModelGeneratorMojoUnitTest
     @Test
     @InjectMojo( goal = "generate", pom = POM_testInvocationWithUnexpectedApiMaturity )
     void testInvocationWithUnexpectedApiMaturity( DataModelGeneratorMojo mojo )
-        throws MojoExecutionException
     {
 
         assertThatExceptionOfType(MojoExecutionException.class)
@@ -131,7 +127,6 @@ class DataModelGeneratorMojoUnitTest
     @Test
     @InjectMojo( goal = "generate", pom = POM_testAdditionalPropertiesAndEnablingAnyOfOneOf )
     void testAdditionalPropertiesAndEnablingAnyOfOneOf( DataModelGeneratorMojo mojo )
-        throws MojoExecutionException
     {
 
         assertThat(mojo.retrieveGenerationConfiguration().get().getAdditionalProperties())
